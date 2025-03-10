@@ -26,6 +26,15 @@ def decode_xyz_data(data):
     z = struct.unpack('h', data[4:6])[0]  # Extract 2-byte signed int
     print(f"Magnetometer Data -> X: {x}, Y: {y}, Z: {z}")
 
+def decode_obstacle_data(data):
+    """ Decodes Obstacle Detection Data from CAN frame """
+    try:
+        message = data.decode('utf-8').strip('\x00')  # Convert bytes to string, remove null terminators
+        print(f"Obstacle Detection -> {message}")
+    except Exception as e:
+        print(f"Error decoding obstacle message: {e}")
+
+
 def receive_can_data():
     try:
         # Create a CAN bus instance (adjust 'can0' if using different interface)
@@ -40,8 +49,10 @@ def receive_can_data():
                 # Decode messages based on their ID
                 if message.arbitration_id == 0x100:
                     decode_gps_data(message.data)
+                # elif message.arbitration_id == 0x109:
+                #     decode_alt_speed_data(message.data)
                 elif message.arbitration_id == 0x101:
-                    decode_alt_speed_data(message.data)
+                    decode_obstacle_data(message.data)
                 elif message.arbitration_id == 0x200:
                     decode_magnetometer_data(message.data)
                 elif message.arbitration_id == 0x201:
