@@ -1,12 +1,17 @@
 import cv2
 import torch
 import numpy as np
-
+from picamera2 import Picamera2
 # Load the YOLOv5 model (pre-trained on COCO dataset or custom road sign model)
 model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
 
 # Open the Raspberry Pi Camera (or USB Camera)
-cap = cv2.VideoCapture(0)  # Change to `1` if using an external webcam
+# cap = cv2.VideoCapture(0)  # Change to `1` if using an external webcam
+
+# Initialize camera
+cap = Picamera2()
+cap.start()
+cv2.namedWindow("Camera Feed", cv2.WINDOW_NORMAL)
 
 while cap.isOpened():
     ret, frame = cap.read()
