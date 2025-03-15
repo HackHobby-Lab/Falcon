@@ -3,7 +3,7 @@ import numpy as np
 from ultralytics import YOLO
 
 # Load YOLOv8 model (use 'yolov8n.pt' or your custom trained model)
-model = YOLO('yolov8n.pt')
+model = YOLO('yolo11n.pt')
 
 # Open the camera
 cap = cv2.VideoCapture(0)
