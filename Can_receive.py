@@ -1,5 +1,6 @@
 import can
 import struct
+import time
 
 def decode_gps_data(data):
     """ Decodes GPS data from CAN frame """
@@ -34,6 +35,16 @@ def decode_obstacle_data(data):
     except Exception as e:
         print(f"Error decoding obstacle message: {e}")
 
+def send_status(bus):
+    """ Sends this node's own status in a CAN message (ID 0x203) """
+    status_byte = 1  # 1 = Online
+    message = can.Message(arbitration_id=0x203, data=[status_byte], is_extended_id=False)
+
+    try:
+        bus.send(message)
+        print(f"Sent status message: ID=0x203, Data={status_byte:08b} (Online)")
+    except can.CanError:
+        print("Failed to send CAN message.")
 
 def receive_can_data():
     try:
@@ -42,7 +53,7 @@ def receive_can_data():
 
         print("Listening for CAN messages...")
         while True:
-            message = bus.recv()  # Wait for a message
+            message = bus.recv(timeout=1)  # Wait for a message, timeout to send status
             if message:
                 print(f"Received CAN message: ID={message.arbitration_id:X}, Data={message.data.hex()}")
 
@@ -57,6 +68,10 @@ def receive_can_data():
                     decode_magnetometer_data(message.data)
                 elif message.arbitration_id == 0x201:
                     decode_xyz_data(message.data)
+
+            # Send this node's status every 2 seconds
+            send_status(bus)
+            time.sleep(1)
 
     except KeyboardInterrupt:
         print("\nStopping CAN receiver.")
